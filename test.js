@@ -7,6 +7,7 @@ function showError(errorText) {
     console.error(errorText); //console.log(errorText) for redundant error message
 }
 
+funciton testFunction(){
 const canvas = document.getElementById("IDcanvas");
 if (!canvas){
     showError("Can't find canvas reference"); //error from typo or pre loaded canvas
@@ -93,3 +94,10 @@ gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 gl.vertexAttribPointer(squarePosition, 2, gl.FLOAT, false, 0, 0);
 
 gl.drawArrays(gl.TRIANGLES, 0, 6);
+}
+
+try {
+    testFunction();
+} catch (error) {
+    showError('failed to run testFunction() JS exception'+error);
+}
