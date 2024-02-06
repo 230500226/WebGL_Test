@@ -10,17 +10,17 @@ function showError(errorText) {
 function testFunction(){
     const canvas = document.getElementById("IDcanvas");
     if (!canvas){
-        showError("Can't find canvas reference"); //error from typo or pre loaded canvas
+        showError("Can't find canvas reference");
         return;
     }
 
     const gl = canvas.getContext("webgl2");
     if (!gl){
-        showError("Can't find webgl2 support"); //error from browser support for webgl2
+        showError("Can't find webgl2 support");
         return;
     }
 
-    // Vertex shader source code
+    //  shader source code
     const vertexShaderSourceCode = `#version 300 es
     precision mediump float;
     in vec2 vertexPosition;
@@ -38,63 +38,157 @@ function testFunction(){
         return;
     }
 
-    // Fragment shader source code
-    const fragmentShaderSourceCode = `#version 300 es
+    // Fragment shader source code for square (neon blue)
+    const fragmentShaderSourceCodeSquare = `#version 300 es
     precision mediump float;
     out vec4 outColor;
     void main() {
         outColor = vec4(0.0, 1.0, 1.0, 1.0); // Neon blue color
     }`;
 
-    const fragmentShader = gl.createShader(gl.FRAGMENT_SHADER);
-    gl.shaderSource(fragmentShader, fragmentShaderSourceCode);
-    gl.compileShader(fragmentShader);
+    const fragmentShaderNeonBlue = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShaderNeonBlue, fragmentShaderSourceCodeSquare);
+    gl.compileShader(fragmentShaderNeonBlue);
 
-    if (!gl.getShaderParameter(fragmentShader, gl.COMPILE_STATUS)){
-        const errorMessage = gl.getShaderInfoLog(fragmentShader);
-        showError('Compile fragment error: ' + errorMessage);
+    if (!gl.getShaderParameter(fragmentShaderNeonBlue, gl.COMPILE_STATUS)){
+        const errorMessage = gl.getShaderInfoLog(fragmentShaderNeonBlue);
+        showError('Compile fragment blue error: ' + errorMessage);
         return;
     }
 
-    const program = gl.createProgram();
-    gl.attachShader(program, vertexShader);
-    gl.attachShader(program, fragmentShader);
-    gl.linkProgram(program);
-    gl.useProgram(program);
+    // Fragment shader source code for pentagon (neon green)
+    const fragmentShaderSourceCodePentagon = `#version 300 es
+    precision mediump float;
+    out vec4 outColor;
+    void main() {
+        outColor = vec4(0.0, 1.0, 0.0, 1.0); // Neon green color
+    }`;
 
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-        const errorMessage = gl.getProgramInfoLog(program);
+    const fragmentShaderNeonGreen = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShaderNeonGreen, fragmentShaderSourceCodePentagon);
+    gl.compileShader(fragmentShaderNeonGreen);
+
+    if (!gl.getShaderParameter(fragmentShaderNeonGreen, gl.COMPILE_STATUS)){
+        const errorMessage = gl.getShaderInfoLog(fragmentShaderNeonGreen);
+        showError('Compile fragment green error: ' + errorMessage);
+        return;
+    }
+
+    // Fragment shader source code for uniform star
+
+
+
+    // Create shader program for square
+    const programSquare = gl.createProgram();
+    gl.attachShader(programSquare, vertexShader);
+    gl.attachShader(programSquare, fragmentShaderNeonBlue);
+    gl.linkProgram(programSquare);
+
+    if (!gl.getProgramParameter(programSquare, gl.LINK_STATUS)) {
+        const errorMessage = gl.getProgramInfoLog(programSquare);
         showError(`Failed to link GPU program: ${errorMessage}`);
         return;
     }
 
-    const squarePosition = gl.getAttribLocation(program, "vertexPosition");
-    if (squarePosition < 0) {
+    // Create shader program for pentagon
+    const programPentagon = gl.createProgram();
+    gl.attachShader(programPentagon, vertexShader);
+    gl.attachShader(programPentagon, fragmentShaderNeonGreen);
+    gl.linkProgram(programPentagon);
+
+    if (!gl.getProgramParameter(programPentagon, gl.LINK_STATUS)) {
+        const errorMessage = gl.getProgramInfoLog(programPentagon);
+        showError(`Failed to link GPU program: ${errorMessage}`);
+        return;
+    }
+
+    // Create shader program for uniform star
+  
+
+
+    const position = gl.getAttribLocation(programSquare, "vertexPosition");
+    if (position < 0) {
         showError(`Failed to get attribute location for vertexPosition`);
         return;
     }
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
+
+    const colorLocation = gl.getUniformLocation(programUniform, "color");
+    if (colorLocation < 0) {
+        showError(`Failed to get uniform location for color`);
+        return;
+    }
+
+    // Define the vertices for the square
+    const squareVertices = [
         -0.8, -0.8,
         0.8, -0.8,
         -0.8,  0.8,
         -0.8,  0.8,
         0.8, -0.8,
-        0.8,  0.8]), gl.STATIC_DRAW);
+        0.8,  0.8
+    ];
+
+    // Define the vertices for the pentagon
+    const pentagonVertices = [
+        0.0, 0.6,   // Top vertex
+        -0.58, 0.2, // Upper left vertex
+        -0.36, -0.5, // Lower left vertex
+        0.36, -0.5, // Lower right vertex
+        0.58, 0.2  // Upper right vertex
+    ];
+
+    // Define the vertices for the star
+    const starVertices = [
+        0.0,  0.1,  
+        0.022,  0.022,   
+        0.1,  0.0,   
+        0.022, -0.022,   
+        0.0, -0.1, 
+        -0.022, -0.022,   
+        -0.1,  0.0,  
+        -0.022,  0.022,   
+        0.0,  0.1   
+    ];
+
+    // Create the buffer for the square
+    const squareBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(squareVertices), gl.STATIC_DRAW);
+
+    // Create the buffer for the pentagon
+    const pentagonBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, pentagonBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pentagonVertices), gl.STATIC_DRAW);
+
+    // Create the buffer for the star
+    const starBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(starVertices), gl.STATIC_DRAW);
 
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-    gl.enableVertexAttribArray(squarePosition);
+    gl.enableVertexAttribArray(position);
 
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-
-    gl.vertexAttribPointer(squarePosition, 2, gl.FLOAT, false, 0, 0);
-
+    // Draw the square
+    gl.useProgram(programSquare);
+    gl.bindBuffer(gl.ARRAY_BUFFER, squareBuffer);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+    // Draw the pentagon
+    gl.useProgram(programPentagon);
+    gl.bindBuffer(gl.ARRAY_BUFFER, pentagonBuffer);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 5);
+
+    // Draw the star
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+    gl.uniform4f(colorLocation, 1.0, 0.0, 0.0, 1.0);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 9);
 }
 
 try {
