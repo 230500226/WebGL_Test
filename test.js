@@ -60,6 +60,7 @@ function testFunction(){
     gl.attachShader(program, vertexShader);
     gl.attachShader(program, fragmentShader);
     gl.linkProgram(program);
+    gl.useProgram(program);
 
     if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
         const errorMessage = gl.getProgramInfoLog(program);
