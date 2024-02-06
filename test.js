@@ -60,17 +60,17 @@ gl.attachShader(program, vertexShader);
 gl.attachShader(program, fragmentShader);
 gl.linkProgram(program);
 
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    const errorMessage = gl.getProgramInfoLog(helloTriangleProgram);
+if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    const errorMessage = gl.getProgramInfoLog(program);
     showError(`Failed to link GPU program: ${errorMessage}`);
     return;
-  }
+}
 
 const squarePosition = gl.getAttribLocation(program, "vertexPosition");
- if (squarePosition < 0) {
+if (squarePosition < 0) {
     showError(`Failed to get attribute location for vertexPosition`);
     return;
-  }
+}
 const buffer = gl.createBuffer();
 gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
 gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
@@ -80,8 +80,9 @@ gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([
     -0.8,  0.8,
     0.8, -0.8,
     0.8,  0.8]), gl.STATIC_DRAW);
-  canvas.width = canvas.clientWidth;
-  canvas.height = canvas.clientHeight;
+
+canvas.width = canvas.clientWidth;
+canvas.height = canvas.clientHeight;
 gl.clearColor(0, 0, 0, 1);
 gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
