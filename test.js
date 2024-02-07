@@ -74,6 +74,24 @@ function testFunction(){
         return;
     }
 
+    // Fragment shader source code for star (neon red)
+    const fragmentShaderSourceCodeStar = `#version 300 es
+    precision mediump float;
+    out vec4 outColor;
+    void main() {
+        outColor = vec4(1.0, 0.0, 0.0, 1.0); // Neon red color
+    }`;
+
+    const fragmentShaderNeonRed = gl.createShader(gl.FRAGMENT_SHADER);
+    gl.shaderSource(fragmentShaderNeonRed, fragmentShaderSourceCodeStar);
+    gl.compileShader(fragmentShaderNeonRed);
+
+    if (!gl.getShaderParameter(fragmentShaderNeonRed, gl.COMPILE_STATUS)){
+        const errorMessage = gl.getShaderInfoLog(fragmentShaderNeonRed);
+        showError('Compile fragment error: ' + errorMessage);
+        return;
+    }
+
     // Create shader program for square
     const programSquare = gl.createProgram();
     gl.attachShader(programSquare, vertexShader);
@@ -94,6 +112,18 @@ function testFunction(){
 
     if (!gl.getProgramParameter(programPentagon, gl.LINK_STATUS)) {
         const errorMessage = gl.getProgramInfoLog(programPentagon);
+        showError(`Failed to link GPU program: ${errorMessage}`);
+        return;
+    }
+
+    // Create shader program for star
+    const programStar = gl.createProgram();
+    gl.attachShader(programStar, vertexShader);
+    gl.attachShader(programStar, fragmentShaderNeonRed);
+    gl.linkProgram(programStar);
+
+    if (!gl.getProgramParameter(programStar, gl.LINK_STATUS)) {
+        const errorMessage = gl.getProgramInfoLog(programStar);
         showError(`Failed to link GPU program: ${errorMessage}`);
         return;
     }
@@ -146,6 +176,11 @@ function testFunction(){
     gl.bindBuffer(gl.ARRAY_BUFFER, pentagonBuffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(pentagonVertices), gl.STATIC_DRAW);
 
+    // Create the buffer for the star
+    const starBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(starVertices), gl.STATIC_DRAW);
+
     canvas.width = canvas.clientWidth;
     canvas.height = canvas.clientHeight;
     gl.clearColor(0, 0, 0, 1);
@@ -164,6 +199,12 @@ function testFunction(){
     gl.bindBuffer(gl.ARRAY_BUFFER, pentagonBuffer);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 5);
+
+    // Draw the star
+    gl.useProgram(programStar);
+    gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
+    gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
+    gl.drawArrays(gl.TRIANGLE_FAN, 0, 9);
 }
 
 try {
@@ -172,9 +213,3 @@ try {
     showError('failed to run testFunction() JS exception'+error);
 }
 
-
-try {
-    testFunction();
-} catch (error) {
-    showError('failed to run testFunction() JS exception'+error);
-}
