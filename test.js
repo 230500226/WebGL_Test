@@ -25,8 +25,9 @@ function testFunction(){
     precision mediump float;
     in vec2 vertexPosition;
     void main() {
-        gl_Position = vec4(vertexPosition, 0.0, 1.0);
-    }`;
+        gl_Position = vec4(vertexPosition, 0.0, 1.0) + vec4(1.2,0.3,0,0);
+    }`; //familiar clippping space
+    //world , view
 
     const vertexShader = gl.createShader(gl.VERTEX_SHADER);
     gl.shaderSource(vertexShader, vertexShaderSourceCode);
@@ -205,6 +206,12 @@ function testFunction(){
     gl.bindBuffer(gl.ARRAY_BUFFER, starBuffer);
     gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 0, 0);
     gl.drawArrays(gl.TRIANGLE_FAN, 0, 9);
+
+    //familair with change x,y val then draw transformations
+    //use reqAnimationFrame
+    //uniform
+    //try dvd screensaver
+    //use button
 }
 
 try {
